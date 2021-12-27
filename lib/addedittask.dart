@@ -1,17 +1,20 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:flip_card/flip_card.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shake/shake.dart';
+
 import 'package:taskmanager/camera.dart';
 import 'package:taskmanager/task.dart';
 
 class addEditTask extends StatefulWidget {
   final List<Item>? items;
-  final GlobalKey<FlipCardState>? cardKey;
-  addEditTask({Key? key, this.items, this.cardKey}) : super(key: key);
+
+  final bool? savedorupdate;
+  final Item? itm;
+  addEditTask({Key? key, this.items, this.savedorupdate, this.itm})
+      : super(key: key);
 
   @override
   _addEditTaskState createState() => _addEditTaskState();
@@ -24,6 +27,8 @@ class _addEditTaskState extends State<addEditTask> {
   @override
   void initState() {
     super.initState();
+    txtbody.text = widget.itm!.content.toString();
+    txttitle.text = widget.itm!.title.toString();
     focus = new FocusNode();
   }
 
@@ -33,8 +38,8 @@ class _addEditTaskState extends State<addEditTask> {
     return SafeArea(
       child: GestureDetector(
         onScaleEnd: (details) {
-          txtbody.clear();
-          setState(() {});
+          // txtbody.clear();
+          //  setState(() {});
         },
         onHorizontalDragEnd: (d) {
           Navigator.pop(context);
@@ -270,15 +275,16 @@ class _addEditTaskState extends State<addEditTask> {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () {
-                        Item it = new Item();
-                        it.content = txtbody.text;
-                        it.title = txttitle.text;
-                        widget.items!.add(it);
-                        widget.cardKey!.currentState!.toggleCard();
-                        setState(() {
-                          txtbody.clear();
-                          txttitle.clear();
-                        });
+                        widget.itm!.id = widget.items!.length;
+                        widget.itm!.content = txtbody.text;
+                        widget.itm!.title = txttitle.text;
+                        if (widget.savedorupdate == false) {
+                          widget.items!.add(widget.itm!);
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Task()),
+                        );
                       },
                       style: ButtonStyle(
                         backgroundColor:
