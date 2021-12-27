@@ -283,7 +283,8 @@ class _addEditTaskState extends State<addEditTask> {
                         }
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Task()),
+                          MaterialPageRoute(
+                              builder: (context) => Task(items: widget.items!)),
                         );
                       },
                       style: ButtonStyle(

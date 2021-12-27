@@ -6,7 +6,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:taskmanager/addedittask.dart';
 
 class Task extends StatefulWidget {
-  Task({Key? key}) : super(key: key);
+  List<Item>? items;
+  Task({Key? key, this.items}) : super(key: key);
 
   @override
   _TaskState createState() => _TaskState();
@@ -24,7 +25,7 @@ class _TaskState extends State<Task> {
 
   bool saveorupdate = false;
   TextEditingController sami = TextEditingController();
-  late List<Item> items = [];
+
   GlobalKey<FlipCardState> cardKey = GlobalKey<FlipCardState>();
   @override
   Widget build(BuildContext context) {
@@ -42,8 +43,8 @@ class _TaskState extends State<Task> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      addEditTask(items: items, savedorupdate: false, itm: it)),
+                  builder: (context) => addEditTask(
+                      items: widget.items, savedorupdate: false, itm: it)),
             );
             // Respond to button press
           },
@@ -121,9 +122,9 @@ class _TaskState extends State<Task> {
                 child: Container(
                     color: Colors.amber,
                     child: ListView.builder(
-                        itemCount: items.length,
+                        itemCount: widget.items!.length,
                         itemBuilder: (context, index) {
-                          var item = items[index];
+                          var item = widget.items![index];
                           return Slidable(
                             key: ValueKey(index),
                             startActionPane: ActionPane(
@@ -146,11 +147,13 @@ class _TaskState extends State<Task> {
                                   onPressed: (c) {
                                     it = item;
                                     saveorupdate = true;
-
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => addEditTask()),
+                                          builder: (context) => addEditTask(
+                                              items: widget.items,
+                                              savedorupdate: saveorupdate,
+                                              itm: item)),
                                     );
                                   },
                                   backgroundColor: Color(0xFF21B7CA),
