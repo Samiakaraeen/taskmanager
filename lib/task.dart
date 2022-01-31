@@ -1,26 +1,55 @@
 import 'dart:collection';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:http/io_client.dart';
 import 'package:taskmanager/addedittask.dart';
 
 class Task extends StatefulWidget {
-  List<Item>? items;
-  Task({Key? key, this.items}) : super(key: key);
+  Task({Key? key}) : super(key: key);
 
   @override
   _TaskState createState() => _TaskState();
 }
 
 class _TaskState extends State<Task> {
+  List<Item>? items = [];
   Item it = new Item();
   @override
   void initState() {
     super.initState();
-    it.id = -1;
-    it.content = '';
-    it.title = '';
+
+    get();
+  }
+
+  void get() async {
+    items = await fetchProducts();
+    setState(() {});
+  }
+
+  Future<List<Item>?> fetchProducts() async {
+    final ioc = new HttpClient();
+    ioc.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    final http = new IOClient(ioc);
+    var response;
+
+    response = await http.get(Uri.parse("https://localhost:44390/api/task"));
+
+    Item i = new Item();
+    if (response.statusCode == 200) {
+      List<Item>? items = i.parseProducts(response.body);
+      try {
+        //  pd.close();
+      } catch (x) {}
+
+      return items;
+    } else {
+      throw Exception('Unable to fetch products from the REST API');
+    }
   }
 
   bool saveorupdate = false;
@@ -43,8 +72,8 @@ class _TaskState extends State<Task> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => addEditTask(
-                      items: widget.items, savedorupdate: false, itm: it)),
+                  builder: (context) =>
+                      addEditTask(items: items, savedorupdate: false, itm: it)),
             );
             // Respond to button press
           },
@@ -122,9 +151,9 @@ class _TaskState extends State<Task> {
                 child: Container(
                     color: Colors.amber,
                     child: ListView.builder(
-                        itemCount: widget.items!.length,
+                        itemCount: items!.length,
                         itemBuilder: (context, index) {
-                          var item = widget.items![index];
+                          var item = items![index];
                           return Slidable(
                             key: ValueKey(index),
                             startActionPane: ActionPane(
@@ -137,7 +166,10 @@ class _TaskState extends State<Task> {
                               children: [
                                 // A SlidableAction can have an icon and/or a label.
                                 SlidableAction(
-                                  onPressed: null,
+                                  onPressed: (d) {
+                                    items!.remove(item);
+                                    setState(() {});
+                                  },
                                   backgroundColor: Color(0xFFFE4A49),
                                   foregroundColor: Colors.white,
                                   icon: Icons.delete,
@@ -151,7 +183,7 @@ class _TaskState extends State<Task> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => addEditTask(
-                                              items: widget.items,
+                                              items: items,
                                               savedorupdate: saveorupdate,
                                               itm: item)),
                                     );
@@ -205,5 +237,22 @@ class Item {
   int? id;
   String? title;
   String? content;
-  Item({this.title, this.content});
+  Item({this.id, this.title, this.content});
+
+  Map toJson() {
+    return {'id': id, 'title': title, 'description': content};
+  }
+
+  List<Item>? parseProducts(String responseBody) {
+    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+    return parsed.map<Item>((json) => Item.fromJson(json)).toList();
+  }
+
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+      id: json['id'],
+      title: json['title'].toString(),
+      content: json['description'].toString(),
+    ); //json['discount'].toDouble());
+  }
 }

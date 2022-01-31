@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/io_client.dart';
 
 import 'package:taskmanager/camera.dart';
 import 'package:taskmanager/task.dart';
@@ -274,18 +277,42 @@ class _addEditTaskState extends State<addEditTask> {
                   Container(
                     width: 100,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection("sami")
+                            .add({"name": txttitle.text, "desc": txtbody.text});
+                        /*
+
+                        await FirebaseFirestore.instance
+              .collection("users").doc("CDWLDzJ2EKJAZ95b7APM").collection("task").add({
+            "name": txttitle.text,"desc" :txtbody.text
+              
+          });
                         widget.itm!.id = widget.items!.length;
                         widget.itm!.content = txtbody.text;
                         widget.itm!.title = txttitle.text;
                         if (widget.savedorupdate == false) {
                           widget.items!.add(widget.itm!);
                         }
+                        final ioc = new HttpClient();
+                        ioc.badCertificateCallback =
+                            (X509Certificate cert, String host, int port) =>
+                                true;
+                        final http = new IOClient(ioc);
+                        var response;
+                        var json = jsonEncode(widget.itm!.toJson());
+                        response = await http.post(
+                            Uri.parse(
+                                'https://localhost:44390/api/task/Savetask'),
+                            headers: <String, String>{
+                              'Content-Type': 'application/json; charset=UTF-8',
+                            },
+                            body: json);
+                        if (response.statusCode == 200) {}
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => Task(items: widget.items!)),
-                        );
+                          MaterialPageRoute(builder: (context) => Task()),
+                        );*/
                       },
                       style: ButtonStyle(
                         backgroundColor:
