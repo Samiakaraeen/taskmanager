@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:http/io_client.dart';
 
 import 'package:taskmanager/camera.dart';
+import 'package:taskmanager/global.dart';
 import 'package:taskmanager/task.dart';
 
 class addEditTask extends StatefulWidget {
@@ -278,12 +279,15 @@ class _addEditTaskState extends State<addEditTask> {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () async {
-                        DocumentReference docid;
-                        docid = await FirebaseFirestore.instance
+                        DocumentReference doc;
+                        doc = await FirebaseFirestore.instance
                             .collection("users")
-                            .add({"name": 'Sami', "email": 'test@tes.com'});
+                            .doc(globals.docid)
+                            .collection("tasks")
+                            .add(
+                                {"title": txttitle.text, "desc": txtbody.text});
 
-                        print('docid:' + docid.id.toString());
+                        print('docid:' + doc.id.toString());
 
                         /*  await FirebaseFirestore.instance
                             .collection("task")
