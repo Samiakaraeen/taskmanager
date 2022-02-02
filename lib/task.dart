@@ -2,11 +2,13 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/io_client.dart';
 import 'package:taskmanager/addedittask.dart';
+import 'package:taskmanager/global.dart';
 
 class Task extends StatefulWidget {
   Task({Key? key}) : super(key: key);
@@ -149,83 +151,27 @@ class _TaskState extends State<Task> {
             ),
             Expanded(
                 child: Container(
-                    color: Colors.amber,
-                    child: ListView.builder(
-                        itemCount: items!.length,
+              color: Colors.amber,
+              child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(globals.docid)
+                      .collection("tasks")
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    return ListView.builder(
+                        itemCount: (snapshot.data!).docs.length,
                         itemBuilder: (context, index) {
-                          var item = items![index];
-                          return Slidable(
-                            key: ValueKey(index),
-                            startActionPane: ActionPane(
-                              // A motion is a widget used to control how the pane animates.
-                              motion: const ScrollMotion(),
-
-                              // A pane can dismiss the Slidable.
-
-                              // All actions are defined in the children parameter.
-                              children: [
-                                // A SlidableAction can have an icon and/or a label.
-                                SlidableAction(
-                                  onPressed: (d) {
-                                    items!.remove(item);
-                                    setState(() {});
-                                  },
-                                  backgroundColor: Color(0xFFFE4A49),
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.delete,
-                                  label: 'Delete',
-                                ),
-                                SlidableAction(
-                                  onPressed: (c) {
-                                    it = item;
-                                    saveorupdate = true;
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => addEditTask(
-                                              items: items,
-                                              savedorupdate: saveorupdate,
-                                              itm: item)),
-                                    );
-                                  },
-                                  backgroundColor: Color(0xFF21B7CA),
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.share,
-                                  label: 'Edit',
-                                ),
-                              ],
-                            ),
-                            endActionPane: const ActionPane(
-                              motion: ScrollMotion(),
-                              children: [
-                                SlidableAction(
-                                  // An action can be bigger than the others.
-                                  flex: 2,
-                                  onPressed: null,
-                                  backgroundColor: Color(0xFF7BC043),
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.archive,
-                                  label: 'Archive',
-                                ),
-                                SlidableAction(
-                                  onPressed: null,
-                                  backgroundColor: Color(0xFF0392CF),
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.save,
-                                  label: 'Save',
-                                ),
-                              ],
-                            ),
-                            child: ListTile(
-                                contentPadding: EdgeInsets.all(10.0),
-                                leading: Text('Id:' +
-                                    item.id.toString() +
-                                    ':' +
-                                    item.title.toString()),
-                                subtitle: Text(item.content.toString()),
-                                title: Text(DateTime.now().toString())),
-                          );
-                        })))
+                          DocumentSnapshot doc = (snapshot.data!).docs[index];
+                          return ListTile(
+                              contentPadding: EdgeInsets.all(10.0),
+                              leading:
+                                  Text('Id:' + doc.id + ':' + doc['title']),
+                              subtitle: Text(doc['desc']),
+                              title: Text(DateTime.now().toString()));
+                        });
+                  }),
+            ))
           ],
         ),
       ),
