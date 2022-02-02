@@ -278,10 +278,18 @@ class _addEditTaskState extends State<addEditTask> {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () async {
-                        await FirebaseFirestore.instance
-                            .collection("sami")
+                        DocumentReference docid;
+                        docid = await FirebaseFirestore.instance
+                            .collection("users")
+                            .add({"name": 'Sami', "email": 'test@tes.com'});
+
+                        print('docid:' + docid.id.toString());
+
+                        /*  await FirebaseFirestore.instance
+                            .collection("task")
+                            .doc(docid).set(data)
                             .add({"name": txttitle.text, "desc": txtbody.text});
-                        /*
+                     
 
                         await FirebaseFirestore.instance
               .collection("users").doc("CDWLDzJ2EKJAZ95b7APM").collection("task").add({
